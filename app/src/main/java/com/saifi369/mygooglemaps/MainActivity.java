@@ -21,6 +21,8 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -56,6 +58,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(GoogleMap googleMap) {
         Log.d(TAG, "onMapReady: map is showing on the screen");
+
+        mGoogleMap=googleMap;
+
+        MarkerOptions markerOptions=new MarkerOptions()
+                .title("My Market")
+                .position(new LatLng(0,0));
+
+        mGoogleMap.addMarker(markerOptions);
 
     }
 
