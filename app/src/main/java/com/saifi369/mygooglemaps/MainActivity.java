@@ -20,6 +20,7 @@ import android.widget.Toast;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -28,7 +29,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private boolean mLocationPermissionGranted;
 
     private GoogleMap mGoogleMap;
-    private MapView mMapView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,10 +42,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .setAction("Action", null).show());
 
         isServicesOk();
-        mMapView=findViewById(R.id.mapView);
-        mMapView.onCreate(savedInstanceState);
 
-        mMapView.getMapAsync(this);
+        SupportMapFragment supportMapFragment= SupportMapFragment.newInstance();
+
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.map_fragment_container,supportMapFragment)
+                .commit();
+
+        supportMapFragment.getMapAsync(this);
 
     }
 
@@ -104,50 +108,5 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         } else {
             Toast.makeText(this, "Permission not granted", Toast.LENGTH_SHORT).show();
         }
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        mMapView.onStart();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        mMapView.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        mMapView.onPause();
-
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        mMapView.onStop();
-
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mMapView.onDestroy();
-
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
-        super.onSaveInstanceState(outState, outPersistentState);
-        mMapView.onSaveInstanceState(outState);
-    }
-
-    @Override
-    public void onLowMemory() {
-        super.onLowMemory();
-        mMapView.onLowMemory();
     }
 }
