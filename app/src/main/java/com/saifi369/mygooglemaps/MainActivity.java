@@ -4,7 +4,6 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -12,22 +11,22 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
-    private final double LAHORE_LAT= 33.690904;
-    private final double LAHORE_LNG= 73.051865;
+    public static final int DEFAULT_ZOOM = 15;
+    private final double ISLAMABAD_LAT= 33.690904;
+    private final double ISLAMABAD_LNG= 73.051865;
 
     public static final int PERMISSION_REQUEST_CODE = 9001;
     public static final String TAG = "MapDebug";
@@ -60,12 +59,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Log.d(TAG, "onMapReady: map is showing on the screen");
 
         mGoogleMap=googleMap;
+        gotoLocation(ISLAMABAD_LAT,ISLAMABAD_LNG);
 
-        MarkerOptions markerOptions=new MarkerOptions()
-                .title("My Market")
-                .position(new LatLng(0,0));
+    }
 
-        mGoogleMap.addMarker(markerOptions);
+    private void gotoLocation(double lat,double lng){
+
+        LatLng latLng=new LatLng(lat,lng);
+
+        CameraUpdate cameraUpdate= CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM);
+
+        mGoogleMap.moveCamera(cameraUpdate);
 
     }
 
