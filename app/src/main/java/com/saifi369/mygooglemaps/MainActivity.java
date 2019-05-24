@@ -26,6 +26,9 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
+    private final double LAHORE_LAT= 33.690904;
+    private final double LAHORE_LNG= 73.051865;
+
     public static final int PERMISSION_REQUEST_CODE = 9001;
     public static final String TAG = "MapDebug";
     private boolean mLocationPermissionGranted;
@@ -45,11 +48,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         isServicesOk();
 
-        SupportMapFragment supportMapFragment= SupportMapFragment.newInstance();
-
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.map_fragment_container,supportMapFragment)
-                .commit();
+        SupportMapFragment supportMapFragment= (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map_fragment_container);
 
         supportMapFragment.getMapAsync(this);
 

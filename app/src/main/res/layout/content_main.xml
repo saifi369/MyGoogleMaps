@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:maps="http://schemas.android.com/apk/res-auto"
+    xmlns:map="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -22,10 +22,19 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.024" />
 
-    <FrameLayout
+    <fragment
         android:id="@+id/map_fragment_container"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        map:cameraTargetLat="33.693590"
+        map:cameraTargetLng="73.068872"
+        map:cameraZoom="15"
+        map:uiRotateGestures="false"
+        map:uiTiltGestures="false"
+        map:uiZoomGestures="false"
+        map:uiScrollGestures="false"
+        map:mapType="hybrid"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
