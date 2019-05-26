@@ -42,15 +42,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(view-> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+        fab.setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show());
 
         initGoogleMap();
 
-        mMapView=findViewById(R.id.mapView);
+        mMapView = findViewById(R.id.mapView);
         mMapView.onCreate(savedInstanceState);
-
-        mMapView.getMapAsync(this);
 
     }
 
@@ -62,10 +60,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void initGoogleMap() {
 
-        if(isServicesOk()){
-            if(checkLocationPermission()){
+        if (isServicesOk()) {
+            if (checkLocationPermission()) {
                 Toast.makeText(this, "Ready to Map", Toast.LENGTH_SHORT).show();
-            }else{
+                mMapView.getMapAsync(this);
+            } else {
                 requestLocationPermission();
             }
         }
@@ -75,7 +74,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private boolean checkLocationPermission() {
 
-        return ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION)
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED;
 
     }
@@ -84,15 +83,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         GoogleApiAvailability googleApi = GoogleApiAvailability.getInstance();
 
-        int result= googleApi.isGooglePlayServicesAvailable(this);
+        int result = googleApi.isGooglePlayServicesAvailable(this);
 
-        if(result == ConnectionResult.SUCCESS){
+        if (result == ConnectionResult.SUCCESS) {
             return true;
-        }else if(googleApi.isUserResolvableError(result)){
-            Dialog dialog=googleApi.getErrorDialog(this,result,PLAY_SERVICES_ERROR_CODE, task->
+        } else if (googleApi.isUserResolvableError(result)) {
+            Dialog dialog = googleApi.getErrorDialog(this, result, PLAY_SERVICES_ERROR_CODE, task ->
                     Toast.makeText(this, "Dialog is cancelled by User", Toast.LENGTH_SHORT).show());
             dialog.show();
-        }else{
+        } else {
             Toast.makeText(this, "Play services are required by this application", Toast.LENGTH_SHORT).show();
         }
         return false;
