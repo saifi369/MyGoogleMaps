@@ -2,13 +2,18 @@ package com.saifi369.mygooglemaps;
 
 import android.Manifest;
 import android.app.Dialog;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -24,7 +29,6 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -34,6 +38,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     public static final int PERMISSION_REQUEST_CODE = 9001;
     private static final int PLAY_SERVICES_ERROR_CODE = 9002;
+    public static final int GPS_REQUEST_CODE = 9003;
     public static final String TAG = "MapDebug";
     private boolean mLocationPermissionGranted;
 
@@ -51,11 +56,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .setAction("Action", null).show());
 
         initGoogleMap();
-
-        SupportMapFragment supportMapFragment= (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map_fragment_container);
-
-        supportMapFragment.getMapAsync(this);
 
     }
 
@@ -78,37 +78,59 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         LatLng latLng=new LatLng(lat,lng);
 
         CameraUpdate cameraUpdate= CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM);
-        showMarker(latLng);
 
         mGoogleMap.moveCamera(cameraUpdate);
         mGoogleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
 
     }
 
-    private void showMarker(LatLng latLng) {
-        MarkerOptions markerOptions=new MarkerOptions();
-        markerOptions.position(latLng);
-        mGoogleMap.addMarker(markerOptions);
-    }
-
     private void initGoogleMap() {
 
         if (isServicesOk()) {
-            if (checkLocationPermission()) {
-                Toast.makeText(this, "Ready to Map", Toast.LENGTH_SHORT).show();
-            } else {
-                requestLocationPermission();
+            if (isGPSEnabled()) {
+                if (checkLocationPermission()) {
+                    Toast.makeText(this, "Ready to Map", Toast.LENGTH_SHORT).show();
+
+                    SupportMapFragment supportMapFragment = (SupportMapFragment) getSupportFragmentManager()
+                            .findFragmentById(R.id.map_fragment_container);
+
+                    supportMapFragment.getMapAsync(this);
+                } else {
+                    requestLocationPermission();
+                }
             }
         }
+    }
 
+    private boolean isGPSEnabled() {
 
+        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+
+        boolean providerEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+
+        if (providerEnabled) {
+            return true;
+        } else {
+
+            AlertDialog alertDialog = new AlertDialog.Builder(this)
+                    .setTitle("GPS Permissions")
+                    .setMessage("GPS is required for this app to work. Please enable GPS.")
+                    .setPositiveButton("Yes", ((dialogInterface, i) -> {
+                        Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                        startActivityForResult(intent, GPS_REQUEST_CODE);
+                    }))
+                    .setCancelable(false)
+                    .show();
+
+        }
+
+        return false;
     }
 
     private boolean checkLocationPermission() {
 
         return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED;
-
     }
 
     private boolean isServicesOk() {
@@ -190,6 +212,24 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(this, "Permission not granted", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == GPS_REQUEST_CODE) {
+
+            LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+
+            boolean providerEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+
+            if (providerEnabled) {
+                Toast.makeText(this, "GPS is enabled", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "GPS not enabled. Unable to show user location", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 }
