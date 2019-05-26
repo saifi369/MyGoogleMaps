@@ -1,6 +1,7 @@
 package com.saifi369.mygooglemaps;
 
 import android.Manifest;
+import android.app.Dialog;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -17,6 +18,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -30,6 +33,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private final double LAHORE_LNG= 73.051865;
 
     public static final int PERMISSION_REQUEST_CODE = 9001;
+    private static final int PLAY_SERVICES_ERROR_CODE = 9002;
     public static final String TAG = "MapDebug";
     private boolean mLocationPermissionGranted;
 
@@ -46,7 +50,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         fab.setOnClickListener(view-> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show());
 
-        isServicesOk();
+        initGoogleMap();
 
         SupportMapFragment supportMapFragment= (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map_fragment_container);
@@ -68,15 +72,43 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mGoogleMap.addMarker(markerOptions);
 
     }
+    private void initGoogleMap() {
 
-    private void isServicesOk() {
-        if (mLocationPermissionGranted) {
-            Toast.makeText(this, "Ready to Map!", Toast.LENGTH_SHORT).show();
-        } else {
-            requestLocationPermission();
+        if(isServicesOk()){
+            if(checkLocationPermission()){
+                Toast.makeText(this, "Ready to Map", Toast.LENGTH_SHORT).show();
+            }else{
+                requestLocationPermission();
+            }
         }
+
+
     }
 
+    private boolean checkLocationPermission() {
+
+        return ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED;
+
+    }
+
+    private boolean isServicesOk() {
+
+        GoogleApiAvailability googleApi = GoogleApiAvailability.getInstance();
+
+        int result= googleApi.isGooglePlayServicesAvailable(this);
+
+        if(result == ConnectionResult.SUCCESS){
+            return true;
+        }else if(googleApi.isUserResolvableError(result)){
+            Dialog dialog=googleApi.getErrorDialog(this,result,PLAY_SERVICES_ERROR_CODE, task->
+                    Toast.makeText(this, "Dialog is cancelled by User", Toast.LENGTH_SHORT).show());
+            dialog.show();
+        }else{
+            Toast.makeText(this, "Play services are required by this application", Toast.LENGTH_SHORT).show();
+        }
+        return false;
+    }
     private void requestLocationPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
