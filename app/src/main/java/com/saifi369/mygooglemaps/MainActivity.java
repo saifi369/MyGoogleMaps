@@ -47,14 +47,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         initGoogleMap();
 
-        SupportMapFragment supportMapFragment= SupportMapFragment.newInstance();
-
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.map_fragment_container,supportMapFragment)
-                .commit();
-
-        supportMapFragment.getMapAsync(this);
-
     }
 
     @Override
@@ -68,6 +60,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         if(isServicesOk()){
             if(checkLocationPermission()){
                 Toast.makeText(this, "Ready to Map", Toast.LENGTH_SHORT).show();
+                SupportMapFragment supportMapFragment= SupportMapFragment.newInstance();
+
+                getSupportFragmentManager().beginTransaction()
+                        .add(R.id.map_fragment_container,supportMapFragment)
+                        .commit();
+
+                supportMapFragment.getMapAsync(this);
             }else{
                 requestLocationPermission();
             }
