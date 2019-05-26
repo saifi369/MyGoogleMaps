@@ -18,9 +18,11 @@ import android.widget.Toast;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMapOptions;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -61,6 +63,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mGoogleMap=googleMap;
         gotoLocation(ISLAMABAD_LAT,ISLAMABAD_LNG);
 
+        mGoogleMap.getUiSettings().setZoomControlsEnabled(true);
+        mGoogleMap.getUiSettings().setMyLocationButtonEnabled(true);
+        mGoogleMap.getUiSettings().setMapToolbarEnabled(true);
+
+
     }
 
     private void gotoLocation(double lat,double lng){
@@ -68,10 +75,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         LatLng latLng=new LatLng(lat,lng);
 
         CameraUpdate cameraUpdate= CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM);
+        showMarker(latLng);
 
         mGoogleMap.moveCamera(cameraUpdate);
         mGoogleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
 
+    }
+
+    private void showMarker(LatLng latLng) {
+        MarkerOptions markerOptions=new MarkerOptions();
+        markerOptions.position(latLng);
+        mGoogleMap.addMarker(markerOptions);
     }
 
     private void isServicesOk() {
