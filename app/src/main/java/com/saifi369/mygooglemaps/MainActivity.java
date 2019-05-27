@@ -10,8 +10,6 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -19,6 +17,9 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -42,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public static final String TAG = "MapDebug";
     private boolean mLocationPermissionGranted;
 
+    private ImageButton mBtnLocate;
     private GoogleMap mGoogleMap;
 
     @Override
@@ -50,13 +52,38 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(view-> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show());
+        mBtnLocate = findViewById(R.id.btn_locate);
+        mBtnLocate.setOnClickListener(this::geoLocate);
 
         initGoogleMap();
 
+    }
+
+    private void geoLocate(View view) {
+        hideSoftKeyboard(view);
+    }
+
+    private void hideSoftKeyboard(View view) {
+        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+
+    private void initGoogleMap() {
+
+        if (isServicesOk()) {
+            if (isGPSEnabled()) {
+                if (checkLocationPermission()) {
+                    Toast.makeText(this, "Ready to Map", Toast.LENGTH_SHORT).show();
+
+                    SupportMapFragment supportMapFragment = (SupportMapFragment) getSupportFragmentManager()
+                            .findFragmentById(R.id.map_fragment_container);
+
+                    supportMapFragment.getMapAsync(this);
+                } else {
+                    requestLocationPermission();
+                }
+            }
+        }
     }
 
     @Override
@@ -80,26 +107,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         CameraUpdate cameraUpdate= CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM);
 
         mGoogleMap.moveCamera(cameraUpdate);
-        mGoogleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+        mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
-    }
-
-    private void initGoogleMap() {
-
-        if (isServicesOk()) {
-            if (isGPSEnabled()) {
-                if (checkLocationPermission()) {
-                    Toast.makeText(this, "Ready to Map", Toast.LENGTH_SHORT).show();
-
-                    SupportMapFragment supportMapFragment = (SupportMapFragment) getSupportFragmentManager()
-                            .findFragmentById(R.id.map_fragment_container);
-
-                    supportMapFragment.getMapAsync(this);
-                } else {
-                    requestLocationPermission();
-                }
-            }
-        }
     }
 
     private boolean isGPSEnabled() {
