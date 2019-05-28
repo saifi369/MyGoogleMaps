@@ -23,6 +23,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -49,7 +50,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         fab.setOnClickListener(view -> {
 
             if (mGoogleMap != null) {
-                mGoogleMap.animateCamera(CameraUpdateFactory.zoomBy(3.0f));
+//                mGoogleMap.animateCamera(CameraUpdateFactory.zoomBy(3.0f));
 
 //                LatLng latLng=new LatLng(36.690904,77.051865);
 //
@@ -66,6 +67,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 //                        Toast.makeText(MainActivity.this, "animation cancelled", Toast.LENGTH_SHORT).show();
 //                    }
 //                });
+
+                //map view window size 0.2*0.2=0.4
+                double bottomBoundry = ISLAMABAD_LAT - 0.3;
+                double leftBoundry = ISLAMABAD_LNG - 0.3;
+                double topBoundry = ISLAMABAD_LAT + 0.3;
+                double rightBoundry = ISLAMABAD_LNG + 0.3;
+
+                LatLngBounds ISLAMABAD_BOUNDS = new LatLngBounds(
+                        new LatLng(bottomBoundry, leftBoundry),
+                        new LatLng(topBoundry, rightBoundry)
+                );
+
+                mGoogleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(ISLAMABAD_BOUNDS, 400, 400, 1));
+
+
             }
 
         });
