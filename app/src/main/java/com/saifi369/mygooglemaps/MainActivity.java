@@ -7,7 +7,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -47,8 +46,29 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(view-> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show());
+        fab.setOnClickListener(view -> {
+
+            if (mGoogleMap != null) {
+                mGoogleMap.animateCamera(CameraUpdateFactory.zoomBy(3.0f));
+
+//                LatLng latLng=new LatLng(36.690904,77.051865);
+//
+//                CameraUpdate cameraUpdate= CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM);
+//
+//                mGoogleMap.animateCamera(cameraUpdate, 5000, new GoogleMap.CancelableCallback() {
+//                    @Override
+//                    public void onFinish() {
+//                        Toast.makeText(MainActivity.this, "animation finished", Toast.LENGTH_SHORT).show();
+//                    }
+//
+//                    @Override
+//                    public void onCancel() {
+//                        Toast.makeText(MainActivity.this, "animation cancelled", Toast.LENGTH_SHORT).show();
+//                    }
+//                });
+            }
+
+        });
 
         initGoogleMap();
 
@@ -66,11 +86,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mGoogleMap=googleMap;
         gotoLocation(ISLAMABAD_LAT,ISLAMABAD_LNG);
 
-        mGoogleMap.getUiSettings().setZoomControlsEnabled(true);
-        mGoogleMap.getUiSettings().setMyLocationButtonEnabled(true);
-        mGoogleMap.getUiSettings().setMapToolbarEnabled(true);
-
-
     }
 
     private void gotoLocation(double lat,double lng){
@@ -81,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         showMarker(latLng);
 
         mGoogleMap.moveCamera(cameraUpdate);
-        mGoogleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+        mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
     }
 
