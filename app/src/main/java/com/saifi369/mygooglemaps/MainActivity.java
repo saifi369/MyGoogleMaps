@@ -4,6 +4,8 @@ import android.Manifest;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -19,6 +21,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -30,6 +33,11 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -45,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private ImageButton mBtnLocate;
     private GoogleMap mGoogleMap;
+    private EditText mSearchAddress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +61,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        mSearchAddress = findViewById(R.id.et_address);
         mBtnLocate = findViewById(R.id.btn_locate);
         mBtnLocate.setOnClickListener(this::geoLocate);
 
@@ -61,6 +72,39 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void geoLocate(View view) {
         hideSoftKeyboard(view);
+
+        String locationName = mSearchAddress.getText().toString();
+
+        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+
+        try {
+            List<Address> addressList = geocoder.getFromLocationName(locationName, 1);
+
+            if (addressList.size() > 0) {
+                Address address = addressList.get(0);
+
+                gotoLocation(address.getLatitude(), address.getLongitude());
+
+                showMarker(address.getLatitude(), address.getLongitude());
+
+                Toast.makeText(this, address.getLocality(), Toast.LENGTH_SHORT).show();
+
+                Log.d(TAG, "geoLocate: Country: " + address.getLocality());
+            }
+
+
+        } catch (IOException e) {
+
+
+        }
+
+
+    }
+
+    private void showMarker(double lat, double lng) {
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(new LatLng(lat, lng));
+        mGoogleMap.addMarker(markerOptions);
     }
 
     private void hideSoftKeyboard(View view) {
