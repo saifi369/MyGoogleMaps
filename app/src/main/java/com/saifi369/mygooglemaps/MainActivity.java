@@ -140,9 +140,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         mGoogleMap=googleMap;
         gotoLocation(ISLAMABAD_LAT,ISLAMABAD_LNG);
+//        mGoogleMap.setMyLocationEnabled(true);
 
         mGoogleMap.getUiSettings().setZoomControlsEnabled(true);
-        mGoogleMap.getUiSettings().setMyLocationButtonEnabled(true);
         mGoogleMap.getUiSettings().setMapToolbarEnabled(true);
 
 
