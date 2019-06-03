@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Geocoder geocoder = new Geocoder(this, Locale.getDefault());
 
         try {
-            List<Address> addressList = geocoder.getFromLocationName(locationName, 1);
+            List<Address> addressList = geocoder.getFromLocation(ISLAMABAD_LAT, ISLAMABAD_LNG, 3);
 
             if (addressList.size() > 0) {
                 Address address = addressList.get(0);
@@ -89,7 +89,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 Toast.makeText(this, address.getLocality(), Toast.LENGTH_SHORT).show();
 
-                Log.d(TAG, "geoLocate: Country: " + address.getLocality());
+                Log.d(TAG, "geoLocate: Locality: " + address.getLocality());
+            }
+
+            for (Address address : addressList) {
+                Log.d(TAG, "geoLocate: Address: " + address.getAddressLine(address.getMaxAddressLineIndex()));
             }
 
 
