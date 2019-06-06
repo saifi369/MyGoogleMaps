@@ -3,6 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.saifi369.mygooglemaps.MainActivity">
     <item
+        android:id="@+id/current_location"
+        android:orderInCategory="1"
+        android:title="Current Location"
+        app:showAsAction="always" />
+    <item
         android:id="@+id/maptype_none"
         android:orderInCategory="100"
         android:title="None"

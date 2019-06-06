@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
+import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -27,6 +28,8 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -39,11 +42,13 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener {
 
     public static final int DEFAULT_ZOOM = 15;
-    private final double ISLAMABAD_LAT= 33.690904;
-    private final double ISLAMABAD_LNG= 73.051865;
+    private final double ISLAMABAD_LAT = 33.690904;
+    private final double ISLAMABAD_LNG = 73.051865;
 
     public static final int PERMISSION_REQUEST_CODE = 9001;
     private static final int PLAY_SERVICES_ERROR_CODE = 9002;
@@ -54,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private ImageButton mBtnLocate;
     private GoogleMap mGoogleMap;
     private EditText mSearchAddress;
+    private FusedLocationProviderClient mLocationClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +74,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         initGoogleMap();
 
+        mLocationClient = new FusedLocationProviderClient(this);
+
     }
 
     private void geoLocate(View view) {
@@ -78,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Geocoder geocoder = new Geocoder(this, Locale.getDefault());
 
         try {
-            List<Address> addressList = geocoder.getFromLocation(ISLAMABAD_LAT, ISLAMABAD_LNG, 3);
+            List<Address> addressList = geocoder.getFromLocationName(locationName, 1);
 
             if (addressList.size() > 0) {
                 Address address = addressList.get(0);
@@ -138,21 +146,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onMapReady(GoogleMap googleMap) {
         Log.d(TAG, "onMapReady: map is showing on the screen");
 
-        mGoogleMap=googleMap;
-        gotoLocation(ISLAMABAD_LAT,ISLAMABAD_LNG);
+        mGoogleMap = googleMap;
+        gotoLocation(ISLAMABAD_LAT, ISLAMABAD_LNG);
 //        mGoogleMap.setMyLocationEnabled(true);
 
         mGoogleMap.getUiSettings().setZoomControlsEnabled(true);
         mGoogleMap.getUiSettings().setMapToolbarEnabled(true);
 
-
     }
 
-    private void gotoLocation(double lat,double lng){
+    private void gotoLocation(double lat, double lng) {
 
-        LatLng latLng=new LatLng(lat,lng);
+        LatLng latLng = new LatLng(lat, lng);
 
-        CameraUpdate cameraUpdate= CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM);
+        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM);
 
         mGoogleMap.moveCamera(cameraUpdate);
         mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
@@ -232,32 +239,51 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        switch (id){
+        switch (id) {
 
-            case R.id.maptype_none:{
+            case R.id.maptype_none: {
                 mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NONE);
                 break;
             }
-            case R.id.maptype_normal:{
+            case R.id.maptype_normal: {
                 mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
                 break;
             }
-            case R.id.maptype_satellite:{
+            case R.id.maptype_satellite: {
                 mGoogleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
                 break;
             }
-            case R.id.maptype_terrain:{
+            case R.id.maptype_terrain: {
                 mGoogleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
                 break;
             }
-            case R.id.maptype_hybrid:{
+            case R.id.maptype_hybrid: {
                 mGoogleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+                break;
+            }
+            case R.id.current_location: {
+                getCurrentLocation();
                 break;
             }
 
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void getCurrentLocation() {
+
+        mLocationClient.getLastLocation().addOnCompleteListener(task -> {
+
+            if (task.isSuccessful()) {
+                Location location = task.getResult();
+                gotoLocation(location.getLatitude(), location.getLongitude());
+            } else {
+                Log.d(TAG, "getCurrentLocation: Error: " + task.getException().getMessage());
+            }
+
+        });
+
     }
 
     @Override
@@ -288,5 +314,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Toast.makeText(this, "GPS not enabled. Unable to show user location", Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        Toast.makeText(this, "Connected to Location Services", Toast.LENGTH_SHORT).show();
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
     }
 }
