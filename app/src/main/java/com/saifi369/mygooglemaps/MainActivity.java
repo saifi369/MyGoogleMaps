@@ -10,6 +10,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Looper;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -30,6 +31,10 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -60,6 +65,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private GoogleMap mGoogleMap;
     private EditText mSearchAddress;
     private FusedLocationProviderClient mLocationClient;
+    private LocationCallback mLocationCallback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,7 +80,26 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         initGoogleMap();
 
-        mLocationClient = new FusedLocationProviderClient(this);
+        mLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        mLocationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+
+                if (locationResult == null) {
+                    return;
+                }
+
+                Location location = locationResult.getLastLocation();
+
+                Toast.makeText(MainActivity.this, location.getLatitude() + " \n" +
+                        location.getLongitude(), Toast.LENGTH_SHORT).show();
+
+                Log.d(TAG, "onLocationResult: " + location.getLatitude() + " \n" +
+                        location.getLongitude());
+
+
+            }
+        };
 
     }
 
@@ -233,12 +258,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         switch (id) {
 
             case R.id.maptype_none: {
@@ -262,7 +283,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 break;
             }
             case R.id.current_location: {
-                getCurrentLocation();
+                getLocationUpdates();
                 break;
             }
 
@@ -283,6 +304,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
 
         });
+
+    }
+
+    private void getLocationUpdates() {
+
+        LocationRequest locationRequest = LocationRequest.create();
+        locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+        locationRequest.setInterval(10 * 1000 * 60);
+        locationRequest.setFastestInterval(1000 * 60);
+
+        mLocationClient.requestLocationUpdates(locationRequest, mLocationCallback, Looper.getMainLooper());
 
     }
 
@@ -330,5 +362,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mLocationCallback != null) {
+            mLocationClient.removeLocationUpdates(mLocationCallback);
+        }
     }
 }
