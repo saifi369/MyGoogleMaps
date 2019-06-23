@@ -311,8 +311,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         LocationRequest locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
-        locationRequest.setInterval(10 * 1000 * 60);
-        locationRequest.setFastestInterval(1000 * 60);
+        locationRequest.setInterval(10 * 1000);  // 1000*10 = 10 seconds
+        locationRequest.setFastestInterval(5000);
 
         mLocationClient.requestLocationUpdates(locationRequest, mLocationCallback, Looper.getMainLooper());
 
