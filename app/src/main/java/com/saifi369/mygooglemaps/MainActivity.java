@@ -14,6 +14,7 @@ import android.os.Looper;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -25,6 +26,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -62,6 +64,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private boolean mLocationPermissionGranted;
 
     private ImageButton mBtnLocate;
+    private TextView mOutputText;
     private GoogleMap mGoogleMap;
     private EditText mSearchAddress;
     private FusedLocationProviderClient mLocationClient;
@@ -76,6 +79,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         mSearchAddress = findViewById(R.id.et_address);
         mBtnLocate = findViewById(R.id.btn_locate);
+        mOutputText = findViewById(R.id.tv_location);
         mBtnLocate.setOnClickListener(this::geoLocate);
 
         initGoogleMap();
@@ -93,6 +97,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 Toast.makeText(MainActivity.this, location.getLatitude() + " \n" +
                         location.getLongitude(), Toast.LENGTH_SHORT).show();
+
+                mOutputText.setText(location.getLatitude() + " : " + location.getLongitude());
+
+                gotoLocation(location.getLatitude(), location.getLongitude());
+                showMarker(location.getLatitude(), location.getLongitude());
+
 
                 Log.d(TAG, "onLocationResult: " + location.getLatitude() + " \n" +
                         location.getLongitude());
@@ -187,7 +197,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM);
 
         mGoogleMap.moveCamera(cameraUpdate);
-        mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+//        mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
     }
 
@@ -294,6 +304,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void getCurrentLocation() {
 
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
         mLocationClient.getLastLocation().addOnCompleteListener(task -> {
 
             if (task.isSuccessful()) {
@@ -310,11 +323,34 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void getLocationUpdates() {
 
         LocationRequest locationRequest = LocationRequest.create();
-        locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
-        locationRequest.setInterval(10 * 1000 * 60);
-        locationRequest.setFastestInterval(1000 * 60);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setInterval(5000);
+        locationRequest.setFastestInterval(1000);
 
-        mLocationClient.requestLocationUpdates(locationRequest, mLocationCallback, Looper.getMainLooper());
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Looper.prepare();
+                Log.d(TAG, "run: done");
+
+                if (ActivityCompat.checkSelfPermission(
+                        MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED
+                        && ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    Log.d(TAG, "run: done");
+
+                    return;
+                }
+                mLocationClient.requestLocationUpdates(locationRequest, mLocationCallback, Looper.getMainLooper());
+
+            }
+        }).start();
+
 
     }
 
