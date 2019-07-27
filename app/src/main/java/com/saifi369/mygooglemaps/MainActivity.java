@@ -12,18 +12,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -49,6 +43,14 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
@@ -66,6 +68,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private ImageButton mBtnLocate;
     private TextView mOutputText;
     private GoogleMap mGoogleMap;
+    private Button mBtnBatchLocation;
     private EditText mSearchAddress;
     private FusedLocationProviderClient mLocationClient;
     private LocationCallback mLocationCallback;
@@ -81,6 +84,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mBtnLocate = findViewById(R.id.btn_locate);
         mOutputText = findViewById(R.id.tv_location);
         mBtnLocate.setOnClickListener(this::geoLocate);
+        mBtnBatchLocation = findViewById(R.id.btn_batch_location);
+
+        mBtnBatchLocation.setOnClickListener(this::batchLocationButtonClicked);
 
         initGoogleMap();
 
@@ -111,6 +117,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         };
 
+    }
+
+    private void batchLocationButtonClicked(View view) {
+        Intent intent = new Intent(MainActivity.this, BatchLocationActivity.class);
+        startActivity(intent);
     }
 
     private void geoLocate(View view) {
