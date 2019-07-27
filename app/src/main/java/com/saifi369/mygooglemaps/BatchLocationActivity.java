@@ -96,6 +96,7 @@ public class BatchLocationActivity extends AppCompatActivity implements
 //        mLocationClient.removeLocationUpdates(mLocationCallback);
     }
 
+
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 

@@ -20,7 +20,6 @@ public class LocationResultHelper {
     private Context mContext;
     private List<Location> mLocationList;
 
-
     public LocationResultHelper(Context mContext, List<Location> mLocationList) {
         this.mContext = mContext;
         this.mLocationList = mLocationList;
