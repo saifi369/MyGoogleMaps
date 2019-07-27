@@ -1,7 +1,6 @@
 package com.saifi369.mygooglemaps;
 
 import android.Manifest;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -22,8 +21,7 @@ import java.util.List;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
-public class BatchLocationActivity extends AppCompatActivity implements
-        SharedPreferences.OnSharedPreferenceChangeListener {
+public class BatchLocationActivity extends AppCompatActivity {
 
     public static final String TAG = "MyTag";
     private TextView mOutputText;
@@ -54,8 +52,6 @@ public class BatchLocationActivity extends AppCompatActivity implements
                 LocationResultHelper helper = new LocationResultHelper(BatchLocationActivity.this, locations);
 
                 helper.showNotification();
-
-                helper.saveLocationResults();
 
                 Toast.makeText(BatchLocationActivity.this, "Location received: " + locations.size(), Toast.LENGTH_SHORT).show();
 
@@ -96,12 +92,4 @@ public class BatchLocationActivity extends AppCompatActivity implements
 //        mLocationClient.removeLocationUpdates(mLocationCallback);
     }
 
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-
-        if (key.equals(LocationResultHelper.KEY_LOCATION_RESULTS)) {
-            mOutputText.setText(LocationResultHelper.getSavedLocationResults(this));
-        }
-
-    }
 }

@@ -5,7 +5,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
-import android.preference.PreferenceManager;
 
 import java.text.DateFormat;
 import java.util.Date;
@@ -16,7 +15,6 @@ import androidx.core.app.TaskStackBuilder;
 
 public class LocationResultHelper {
 
-    public static final String KEY_LOCATION_RESULTS = "key-location-results";
     private Context mContext;
     private List<Location> mLocationList;
 
@@ -25,14 +23,6 @@ public class LocationResultHelper {
         this.mContext = mContext;
         this.mLocationList = mLocationList;
     }
-
-    public static String getSavedLocationResults(Context context) {
-
-        return PreferenceManager.getDefaultSharedPreferences(context)
-                .getString(KEY_LOCATION_RESULTS, "");
-
-    }
-
     public String getLocationResultText() {
 
         if (mLocationList.isEmpty()) {
@@ -97,14 +87,5 @@ public class LocationResultHelper {
         return manager;
 
     }
-
-    public void saveLocationResults() {
-        PreferenceManager.getDefaultSharedPreferences(mContext)
-                .edit()
-                .putString(KEY_LOCATION_RESULTS, getLocationResultTitle() + "\n" +
-                        getLocationResultText())
-                .apply();
-    }
-
 
 }
