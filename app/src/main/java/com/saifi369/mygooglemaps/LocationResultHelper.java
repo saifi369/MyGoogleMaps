@@ -28,7 +28,7 @@ public class LocationResultHelper {
     public static String getSavedLocationResults(Context context) {
 
         return PreferenceManager.getDefaultSharedPreferences(context)
-                .getString(KEY_LOCATION_RESULTS, "");
+                .getString(KEY_LOCATION_RESULTS, "default value");
 
     }
 
