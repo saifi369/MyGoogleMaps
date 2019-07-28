@@ -25,13 +25,6 @@ public class LocationResultHelper {
         this.mLocationList = mLocationList;
     }
 
-    public static String getSavedLocationResults(Context context) {
-
-        return PreferenceManager.getDefaultSharedPreferences(context)
-                .getString(KEY_LOCATION_RESULTS, "default value");
-
-    }
-
     public String getLocationResultText() {
 
         if (mLocationList.isEmpty()) {
@@ -105,5 +98,11 @@ public class LocationResultHelper {
                 .apply();
     }
 
+    public static String getSavedLocationResults(Context context) {
+
+        return PreferenceManager.getDefaultSharedPreferences(context)
+                .getString(KEY_LOCATION_RESULTS, "default value");
+
+    }
 
 }

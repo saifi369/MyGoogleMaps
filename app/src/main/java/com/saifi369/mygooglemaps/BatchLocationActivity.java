@@ -1,6 +1,7 @@
 package com.saifi369.mygooglemaps;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -28,7 +29,7 @@ public class BatchLocationActivity extends AppCompatActivity implements
 
     public static final String TAG = "MyTag";
     private TextView mOutputText;
-    private Button mBtnLocationRequest;
+    private Button mBtnLocationRequest, mBtnStartService, mBtnStopService;
     private FusedLocationProviderClient mLocationClient;
     private LocationCallback mLocationCallback;
 
@@ -39,6 +40,8 @@ public class BatchLocationActivity extends AppCompatActivity implements
 
         mOutputText = findViewById(R.id.tv_output);
         mBtnLocationRequest = findViewById(R.id.btn_location_request);
+        mBtnStartService = findViewById(R.id.btn_start_service);
+        mBtnStopService = findViewById(R.id.btn_stop_service);
 
         mLocationClient = LocationServices.getFusedLocationProviderClient(this);
         mLocationCallback = new LocationCallback() {
@@ -68,8 +71,28 @@ public class BatchLocationActivity extends AppCompatActivity implements
 
             }
         };
-        mBtnLocationRequest.setOnClickListener(this::requestBatchLocationUpdates);
 
+        mBtnLocationRequest.setOnClickListener(this::requestBatchLocationUpdates);
+        mBtnStartService.setOnClickListener(this::startLocationService);
+        mBtnStopService.setOnClickListener(this::stopLocationService);
+
+    }
+
+    private void startLocationService(View view) {
+        //start background location service
+
+        Intent intent = new Intent(this, MyBackgroundLocationService.class);
+        ContextCompat.startForegroundService(this, intent);
+        Toast.makeText(this, "Service Started", Toast.LENGTH_SHORT).show();
+
+    }
+
+    private void stopLocationService(View view) {
+        //stop background location service
+
+        Intent intent = new Intent(this, MyBackgroundLocationService.class);
+        stopService(intent);
+        Toast.makeText(this, "Service Stopped", Toast.LENGTH_SHORT).show();
 
     }
 
