@@ -10,7 +10,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Looper;
+import android.os.HandlerThread;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -31,7 +31,6 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -49,20 +48,17 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
-        GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener {
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     public static final int DEFAULT_ZOOM = 15;
-    private final double ISLAMABAD_LAT = 33.690904;
-    private final double ISLAMABAD_LNG = 73.051865;
-
     public static final int PERMISSION_REQUEST_CODE = 9001;
-    private static final int PLAY_SERVICES_ERROR_CODE = 9002;
     public static final int GPS_REQUEST_CODE = 9003;
     public static final String TAG = "MapDebug";
+    private static final int PLAY_SERVICES_ERROR_CODE = 9002;
+    private final double ISLAMABAD_LAT = 33.690904;
+    private final double ISLAMABAD_LNG = 73.051865;
+    HandlerThread mHandlerThread;
     private boolean mLocationPermissionGranted;
-
     private ImageButton mBtnLocate;
     private TextView mOutputText;
     private GoogleMap mGoogleMap;
@@ -98,15 +94,25 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Toast.makeText(MainActivity.this, location.getLatitude() + " \n" +
                         location.getLongitude(), Toast.LENGTH_SHORT).show();
 
-                mOutputText.setText(location.getLatitude() + " : " + location.getLongitude());
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mOutputText.setText(location.getLatitude() + ":" + location.getLongitude());
 
-                gotoLocation(location.getLatitude(), location.getLongitude());
-                showMarker(location.getLatitude(), location.getLongitude());
+                        gotoLocation(location.getLatitude(), location.getLongitude());
+
+                        showMarker(location.getLatitude(), location.getLongitude());
+
+                        Log.d(TAG, "inside runOnUiThread method: Thread name: " + Thread.currentThread().getName());
+
+                    }
+                });
 
 
                 Log.d(TAG, "onLocationResult: " + location.getLatitude() + " \n" +
                         location.getLongitude());
 
+                Log.d(TAG, "onLocationResult: Thread name: " + Thread.currentThread().getName());
 
             }
         };
@@ -183,7 +189,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         mGoogleMap = googleMap;
         gotoLocation(ISLAMABAD_LAT, ISLAMABAD_LNG);
-//        mGoogleMap.setMyLocationEnabled(true);
+        //        mGoogleMap.setMyLocationEnabled(true);
 
         mGoogleMap.getUiSettings().setZoomControlsEnabled(true);
         mGoogleMap.getUiSettings().setMapToolbarEnabled(true);
@@ -197,7 +203,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM);
 
         mGoogleMap.moveCamera(cameraUpdate);
-//        mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        //        mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
     }
 
@@ -327,30 +333,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         locationRequest.setInterval(5000);
         locationRequest.setFastestInterval(1000);
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
             return;
         }
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Looper.prepare();
-                Log.d(TAG, "run: done");
+        mHandlerThread = new HandlerThread("LocationCallbackThread");
+        mHandlerThread.start();
 
-                if (ActivityCompat.checkSelfPermission(
-                        MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)
-                        != PackageManager.PERMISSION_GRANTED
-                        && ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    Log.d(TAG, "run: done");
-
-                    return;
-                }
-                mLocationClient.requestLocationUpdates(locationRequest, mLocationCallback, Looper.getMainLooper());
-
-            }
-        }).start();
-
+        mLocationClient.requestLocationUpdates(locationRequest, mLocationCallback, mHandlerThread.getLooper());
 
     }
 
@@ -385,26 +376,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        Toast.makeText(this, "Connected to Location Services", Toast.LENGTH_SHORT).show();
-
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
-    }
-
-    @Override
     protected void onPause() {
         super.onPause();
         if (mLocationCallback != null) {
             mLocationClient.removeLocationUpdates(mLocationCallback);
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mHandlerThread.quit();
     }
 }
